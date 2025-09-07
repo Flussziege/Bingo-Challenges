@@ -94,12 +94,68 @@ const playerDisplay = document.getElementById("playerDisplay");
 const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
-// Beispiel-Challenges
-const challenges = Array.from({length:81},(_,i)=>[`C${i+1}`,`Challenge ${i+1} ausführlich`]);
+// 🔹 Challenge-Pool
+const challengePool = [
+  ["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
+  ["Damage Dealer", "Habe mehr als 50k Schaden."],
+  ["Death Count", "Habe mehr als 20 Tode."],
+  ["First Strike", "Erhalte First Blood."],
+  ["Comeback King", "Gewinne trotz 8k Gold Defizit."],
+  ["Swift Turret", "Bekomme einen Turm in unter 8 Minuten."],
+  ["Penta Slayer", "Erziele einen Penta Kill."],
+  ["Nexus Opener", "Gewinne trotz eines offenen (eigenen) Nexus."],
+  ["CS Machine", "Habe mindestens 9 CS pro Minute."],
+  ["Speedrun Any%", "Gewinne das Spiel in unter 15 Minuten."],
+  ["ULT Trio", "Treffe mindestens 3 Gegner mit deiner Ultimate."],
+  ["Critical Support", "Treffe einen Crit mit Yuumi."],
+  ["Tombstone", "Habe mehr als 3 Tode."],
+  ["Hat Collector", "Sammle mehr als 15 Hüte."],
+  ["Ignite Executioner", "Erziele einen Kill mit Ignite."],
+  ["Flashless Hero", "Spiele das Spiel ohne Flash."],
+  ["Unscathed", "Verlasse einen Teamfight mit voller HP."],
+  ["AP/AD Overload", "Alle Spieler im Team sind FULL AP oder FULL AD."],
+  ["Survivor", "Überlebe 20 Minuten am Stück ohne zu sterben."],
+  ["Barefoot", "Spiele das Spiel ohne Boots."],
+  ["Wind Rider", "Spiele Yasuo."],
+  ["Heartstealer", "Erziele über 500 Heilung durch Heartsteal."],
+  ["I'll do it myself", "Spiele AD Milio erfolgreich."],
+  ["Damage Master", "Habe den meisten Schaden im Spiel."],
+  ["Soul Collector", "Habe ein volles Mejai's Soulstealer aufgebaut."],
+  ["Immortal", "Gewinne ohne zu sterben."]
+  ["Jungle First", "Erreiche als Jungle-Player den First Blood."],
+  ["Tower Dive", "Erledige einen Gegner unter dem Turm."],
+  ["Triple Kill", "Erziele einen Triple Kill in einem Fight."],
+  ["Dragon Steal", "Stehle den Drachen von den Gegnern."],
+  ["Baron Steal", "Stehle den Baron Nashor."],
+  ["Assist King", "Sammle die meisten Assists im Team."],
+  ["Backdoor", "Gewinne durch Backdoor ohne Teamfight."],
+  ["CS Master", "Erreiche 10 CS pro Minute im Spiel."],
+  ["Gold Lead", "Baue einen Goldvorsprung von 5k auf."],
+  ["Epic Save", "Rette ein Teammitglied vor dem Tod."],
+  ["Tower Destroyer", "Zerstöre 3 gegnerische Türme."],
+  ["Item Rush", "Kaufe ein Full-Item-Build zuerst im Team."],
+  ["First Tower", "Nimm den ersten Turm des Spiels."],
+  ["Vision Control", "Erhalte 80 Vision Score"],
+  ["Enemy Jungler Dead", "Töte den gegnerischen Jungler 3x."],
+  ["Lane Domination", "Gewinne deine Lane (min 18) ohne zu sterben."],
+  ["Quick Recall", "Recall unter 10 Sekunden nach Kill."],
+  ["Epic Ult", "Treffe mindestens 3 Gegner mit deiner Ultimate."],
+  ["Champion Master", "Spiele deinen Lieblingschampion perfekt. (keine Tode/Assist)"],
+
+ // hier kannst du weitere Challenges hinzufügen
+
+];
+
+// 🔹 Zufällige Auswahl
+function getRandomChallenges(pool, count) {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
+let challenges = [];
 
 // Start Spiel
 startBtn.addEventListener("click",()=>{
@@ -108,6 +164,11 @@ startBtn.addEventListener("click",()=>{
   playerColor=colorInput.value;
   gridSize=parseInt(gridSizeInput.value);
   playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
+
+  // Zufällige Challenges für das Spiel auswählen
+  const totalFields = gridSize * gridSize;
+  challenges = getRandomChallenges(challengePool, totalFields);
+
   set(ref(db,"gridSize"),gridSize);
   nameInput.style.display="none";
   colorInput.style.display="none";
@@ -234,6 +295,8 @@ onValue(ref(db), snapshot=>{
 // Reset
 resetBtn.addEventListener("click",()=>{
   remove(ref(db,"board"));
+  const totalFields = gridSize * gridSize;
+  challenges = getRandomChallenges(challengePool, totalFields); // neue zufällige Challenges
   createGrid(gridSize);
 });
 </script>
