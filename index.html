@@ -70,7 +70,7 @@ input, select, button { font-size:16px; padding:5px; margin:5px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// 🔹 Firebase config hier einfügen
+// 🔹 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCDGnsgg1muZSLsiogP0AydwfRMmnL-rC0",
   authDomain: "lol-bingo.firebaseapp.com",
@@ -94,9 +94,9 @@ const playerDisplay = document.getElementById("playerDisplay");
 const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
-// 🔹 Challenge-Pool
+// 🔹 Challenge-Pool (gekürzt für Übersicht – du kannst alle 81 einsetzen)
 const challengePool = [
-  ["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
+["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
   ["Damage Dealer", "Habe mehr als 50k Schaden."],
   ["Death Count", "Habe mehr als 20 Tode."],
   ["First Strike", "Erhalte First Blood."],
@@ -153,8 +153,6 @@ const challengePool = [
   ["Flashless Killer", "Erziele einen Kill ohne Flash."],
   ["Tower Focus", "Verursache 5k Schaden an einem Turm."],
   ["Heal Overload", "Heile 1500 HP innerhalb von 5 Minuten."]
- // hier kannst du weitere Challenges hinzufügen
-
 ];
 
 // 🔹 Zufällige Auswahl
@@ -166,9 +164,8 @@ function getRandomChallenges(pool, count) {
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
-let challenges = [];
 
-// Start Spiel
+// Start Spiel (setzt Grid global in DB)
 startBtn.addEventListener("click",()=>{
   if(!nameInput.value.trim()){alert("Bitte gib deinen Namen ein!");return;}
   playerName=nameInput.value.trim();
@@ -176,20 +173,19 @@ startBtn.addEventListener("click",()=>{
   gridSize=parseInt(gridSizeInput.value);
   playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
 
-  // Zufällige Challenges für das Spiel auswählen
+  // Grid in Firebase speichern
   const totalFields = gridSize * gridSize;
-  challenges = getRandomChallenges(challengePool, totalFields);
+  const challenges = getRandomChallenges(challengePool, totalFields);
+  set(ref(db,"grid"),{ gridSize, challenges });
 
-  set(ref(db,"gridSize"),gridSize);
   nameInput.style.display="none";
   colorInput.style.display="none";
   gridSizeInput.style.display="none";
   startBtn.style.display="none";
-  createGrid(gridSize);
 });
 
 // Grid erstellen
-function createGrid(size){
+function createGrid(size,challenges){
   grid.innerHTML="";
   grid.style.gridTemplateColumns=`repeat(${size},96px)`;
   const total=size*size;
@@ -206,8 +202,8 @@ function createGrid(size){
 
     cell.addEventListener("click", async (e)=>{
       const fieldRef = ref(db,"board/"+i);
-      const snapshot = await onValueOnce(fieldRef);
-      const fieldData = snapshot.val() || { players:{} };
+      const snap = await new Promise(res=>onValue(fieldRef,s=>{res(s);}, {onlyOnce:true}));
+      const fieldData = snap.val() || { players:{} };
       const players = fieldData.players || {};
       const exclusivePlayer = fieldData.exclusivePlayer || null;
       const isSelected = players[playerName] !== undefined;
@@ -232,13 +228,6 @@ function createGrid(size){
   }
 }
 
-// einmaliges Firebase lesen
-function onValueOnce(ref){
-  return new Promise(resolve=>{
-    const off = onValue(ref,snap=>{resolve(snap); off();});
-  });
-}
-
 // Kontrastfarbe
 function getContrastYIQ(hex){
   hex=hex.replace("#","");
@@ -249,17 +238,20 @@ function getContrastYIQ(hex){
   return yiq>=128?"black":"white";
 }
 
-// Firebase Listener & Feldfarben + Statistik
-onValue(ref(db), snapshot=>{
-  const data = snapshot.val()||{};
-  const board = data.board||{};
-  const size = data.gridSize||gridSize;
-  if(size!==gridSize){gridSize=size;createGrid(gridSize);}
+// Listener für Grid und Board
+onValue(ref(db,"grid"), snap=>{
+  if(snap.exists()){
+    const { gridSize: size, challenges } = snap.val();
+    gridSize=size;
+    createGrid(size,challenges);
+  }
+});
 
+onValue(ref(db,"board"), snapshot=>{
+  const board = snapshot.val()||{};
   document.querySelectorAll(".cell").forEach(cell=>{
     const idx = cell.dataset.index;
     const field = board[idx];
-    cell.textContent = cell.dataset.challengeShort||"";
     cell.style.border="2px solid #333";
     cell.style.background="#fff";
     cell.style.color="black";
@@ -303,15 +295,11 @@ onValue(ref(db), snapshot=>{
   playerStatsDiv.innerHTML = statsHTML;
 });
 
-// Reset
+// Reset: löscht Board und Grid
 resetBtn.addEventListener("click",()=>{
   remove(ref(db,"board"));
-  const totalFields = gridSize * gridSize;
-  challenges = getRandomChallenges(challengePool, totalFields); // neue zufällige Challenges
-  createGrid(gridSize);
+  remove(ref(db,"grid"));
 });
 </script>
 </body>
 </html>
-
-
