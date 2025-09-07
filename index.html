@@ -94,48 +94,12 @@ const playerDisplay = document.getElementById("playerDisplay");
 const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
-// 🔹 Challenge-Pool
-const challengePool = [
-const challenges = [
-  ["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
-  ["Damage Dealer", "Habe mehr als 50k Schaden."],
-  ["Death Count", "Habe mehr als 20 Tode."],
-  ["Wer zuerst kommt...", "Erhalte First Blood."],
-  ["Comeback King", "Gewinne trotz 8k Gold Defizit."],
-  ["Swift Turret", "Bekomme einen Turm in unter 8 Minuten."],
-  ["Penta Slayer", "Erziele einen Penta Kill."],
-  ["Nexus Opener", "Öffne den Nexus und gewinne das Spiel."],
-  ["CS Machine", "Habe mindestens 9 CS pro Minute."],
-  ["Speedrun Any%", "Gewinne das Spiel in unter 15 Minuten."],
-  ["ULT Trio", "Treffe mindestens 3 Gegner mit deiner Ultimate."],
-  ["Critical Support", "Treffe einen Crit mit Yuumi."],
-  ["Tombstone", "Habe mehr als 3 Tode."],
-  ["Hat Collector", "Sammle mehr als 15 Hüte."],
-  ["Ignite Executioner", "Erziele einen Kill mit Ignite."],
-  ["Flashless Hero", "Spiele das Spiel ohne Flash."],
-  ["Unscathed", "Verlasse einen Teamfight mit voller HP."],
-  ["Overload", "Alle Spieler im Team sind FULL AP oder FULL AD."],
-  ["Survivor", "Überlebe 20 Minuten am Stück ohne zu sterben."],
-  ["Barefoot", "Spiele das Spiel ohne Boots."],
-  ["Wind Rider", "Spiele Yasuo."],
- 
-];
-
-  // hier kannst du weitere Challenges hinzufügen
-  //ARAM:
-  //  ["Snowball Kill", "Erziele einen Kill nach Snowballing."],
-];
-
-// 🔹 Zufällige Auswahl
-function getRandomChallenges(pool, count) {
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-}
+// Beispiel-Challenges
+const challenges = Array.from({length:81},(_,i)=>[`C${i+1}`,`Challenge ${i+1} ausführlich`]);
 
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
-let challenges = [];
 
 // Start Spiel
 startBtn.addEventListener("click",()=>{
@@ -144,11 +108,6 @@ startBtn.addEventListener("click",()=>{
   playerColor=colorInput.value;
   gridSize=parseInt(gridSizeInput.value);
   playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
-
-  // Zufällige Challenges für das Spiel auswählen
-  const totalFields = gridSize * gridSize;
-  challenges = getRandomChallenges(challengePool, totalFields);
-
   set(ref(db,"gridSize"),gridSize);
   nameInput.style.display="none";
   colorInput.style.display="none";
@@ -275,12 +234,8 @@ onValue(ref(db), snapshot=>{
 // Reset
 resetBtn.addEventListener("click",()=>{
   remove(ref(db,"board"));
-  const totalFields = gridSize * gridSize;
-  challenges = getRandomChallenges(challengePool, totalFields); // neue zufällige Challenges
   createGrid(gridSize);
 });
 </script>
 </body>
 </html>
-
-
