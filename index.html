@@ -95,7 +95,34 @@ const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
 // Beispiel-Challenges
-const challenges = Array.from({length:81},(_,i)=>[`C${i+1}`,`Challenge ${i+1} ausführlich`]);
+const challenges = [
+  ["700g Shutdown", "Bekomme ein Shutdown von 500 Gold auf deinen Kopf ausgesetzt."],
+  [">50k Dmg", "Habe mehr als 50k Schaden."],
+  ["20< Tode", "Habe mehr als 20 Tode."],
+  ["First Blood", "Erhalte First Blood."],
+  ["Sieg mit 8k Gold Defizit", "Gewinne trotz 8k Gold Defizit."],
+  ["Turret in <8 min", "Bekomme einen Turm in unter 8 Minuten."],
+  ["Penta Kill", "Erziele einen Penta Kill."],
+  ["Open Nexus", "Öffne den Nexus und gewinne das Spiel."],
+  ["9 cs/min", "Habe mindestens 9 CS pro Minute."],
+  ["Sieg in <15 min", "Gewinne das Spiel in unter 15 Minuten."],
+  ["3 Leute ULT", "Treffe mindestens 3 Gegner mit deiner Ultimate."],
+  ["Crit Yuumi", "Treffe einen Crit mit Yuumi."],
+  ["3> Tode", "Habe mehr als 3 Tode."],
+  ["15 < Hüte", "Sammle mehr als 15 Hüte."],
+  ["Snowball Kill", "Erziele einen Kill nach Snowballing."],
+  ["Ohne Flash", "Spiele das Spiel ohne Flash."],
+  ["Full HP nach Teamfight", "Verlasse einen Teamfight mit voller HP."],
+  ["FULL AP/AD Team", "Alle Spieler im Team sind FULL AP oder FULL AD."],
+  ["Leben für 10 min", "Überlebe 10 Minuten am Stück ohne zu sterben."],
+  ["Ohne Boots", "Spiele das Spiel ohne Boots."],
+  ["Yasuo", "Spiele oder treffe Yasuo in einer Aktion."],
+  ["500+ Heartsteal", "Erziele über 500 Heilung durch Heartsteal."],
+  ["AD Milia", "Spiele AD Milia erfolgreich."],
+  ["Most DMG", "Habe den meisten Schaden im Spiel."],
+  ["Full Mejais", "Habe ein volles Mejai's Soulstealer aufgebaut."]
+];
+
 
 let playerName = "";
 let playerColor = "";
@@ -239,3 +266,4 @@ resetBtn.addEventListener("click",()=>{
 </script>
 </body>
 </html>
+
