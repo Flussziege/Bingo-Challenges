@@ -2,9 +2,10 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Challenge-Tik-Tak-Toe Multiplayer</title>
+<title>Challenge-Tik-Tac-Toe Multiplayer</title>
 <style>
-body { font-family: sans-serif; text-align: center; }
+body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 .grid {
   display: grid;
   gap: 5px;
@@ -31,10 +32,14 @@ body { font-family: sans-serif; text-align: center; }
 }
 input, select, button { font-size:16px; padding:5px; margin:5px; }
 #playerStats { margin-top: 20px; text-align: left; display:inline-block; }
+@media (max-width:600px){
+  .cell { width: 60px; height: 60px; font-size:12px; }
+}
 </style>
 </head>
 <body>
-<h1>Challenge-Tik-Tak-Toe Multiplayer</h1>
+<div class="container">
+<h1>Challenge-Tik-Tac-Toe Multiplayer</h1>
 
 <div>
 <input type="text" id="nameInput" placeholder="Spielername eingeben"><br>
@@ -59,12 +64,13 @@ input, select, button { font-size:16px; padding:5px; margin:5px; }
 
 <h2>Spielerübersicht</h2>
 <div id="playerStats"></div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// 🔹 Firebase initialisieren
+// 🔹 Firebase config hier einfügen
 const firebaseConfig = {
   apiKey: "AIzaSyCDGnsgg1muZSLsiogP0AydwfRMmnL-rC0",
   authDomain: "lol-bingo.firebaseapp.com",
@@ -78,7 +84,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
-// 🔹 DOM Elemente
+// DOM Elemente
 const grid = document.getElementById("grid");
 const resetBtn = document.getElementById("resetBtn");
 const startBtn = document.getElementById("startBtn");
@@ -88,14 +94,14 @@ const playerDisplay = document.getElementById("playerDisplay");
 const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
-// 🔹 Beispiel-Challenges
+// Beispiel-Challenges
 const challenges = Array.from({length:81},(_,i)=>[`C${i+1}`,`Challenge ${i+1} ausführlich`]);
 
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
 
-// 🔹 Start Spiel
+// Start Spiel
 startBtn.addEventListener("click",()=>{
   if(!nameInput.value.trim()){alert("Bitte gib deinen Namen ein!");return;}
   playerName=nameInput.value.trim();
@@ -110,7 +116,7 @@ startBtn.addEventListener("click",()=>{
   createGrid(gridSize);
 });
 
-// 🔹 Grid erstellen
+// Grid erstellen
 function createGrid(size){
   grid.innerHTML="";
   grid.style.gridTemplateColumns=`repeat(${size},96px)`;
@@ -154,14 +160,14 @@ function createGrid(size){
   }
 }
 
-// 🔹 Hilfsfunktion: einmaliges Firebase lesen
+// einmaliges Firebase lesen
 function onValueOnce(ref){
   return new Promise(resolve=>{
     const off = onValue(ref,snap=>{resolve(snap); off();});
   });
 }
 
-// 🔹 Kontrastfarbe
+// Kontrastfarbe
 function getContrastYIQ(hex){
   hex=hex.replace("#","");
   const r=parseInt(hex.substr(0,2),16);
@@ -171,7 +177,7 @@ function getContrastYIQ(hex){
   return yiq>=128?"black":"white";
 }
 
-// 🔹 Firebase Listener & Feldfarben + Statistik
+// Firebase Listener & Feldfarben + Statistik
 onValue(ref(db), snapshot=>{
   const data = snapshot.val()||{};
   const board = data.board||{};
@@ -225,10 +231,10 @@ onValue(ref(db), snapshot=>{
   playerStatsDiv.innerHTML = statsHTML;
 });
 
-// 🔹 Reset
+// Reset
 resetBtn.addEventListener("click",()=>{
   remove(ref(db,"board"));
-  createGrid(gridSize); // Grid leeren & neu rendern
+  createGrid(gridSize);
 });
 </script>
 </body>
