@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Challenge-Bingo Multiplayer</title>
+<title>Challenge-Tik-Tac-Toe Multiplayer</title>
 <style>
 body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
@@ -94,8 +94,8 @@ const playerDisplay = document.getElementById("playerDisplay");
 const gridSizeInput = document.getElementById("gridSize");
 const playerStatsDiv = document.getElementById("playerStats");
 
-// Beispiel-Challenges
-const challenges = [
+// 🔹 Challenge-Pool
+const challengePool = [
   ["700g Shutdown", "Bekomme ein Shutdown von 500 Gold auf deinen Kopf ausgesetzt."],
   [">50k Dmg", "Habe mehr als 50k Schaden."],
   ["20< Tode", "Habe mehr als 20 Tode."],
@@ -110,7 +110,7 @@ const challenges = [
   ["Crit Yuumi", "Treffe einen Crit mit Yuumi."],
   ["3> Tode", "Habe mehr als 3 Tode."],
   ["15 < Hüte", "Sammle mehr als 15 Hüte."],
-  ["Ignite Kill", "Erziele einen Kill mit Ignite."],
+  ["Snowball Kill", "Erziele einen Kill nach Snowballing."],
   ["Ohne Flash", "Spiele das Spiel ohne Flash."],
   ["Full HP nach Teamfight", "Verlasse einen Teamfight mit voller HP."],
   ["FULL AP/AD Team", "Alle Spieler im Team sind FULL AP oder FULL AD."],
@@ -120,13 +120,20 @@ const challenges = [
   ["500+ Heartsteal", "Erziele über 500 Heilung durch Heartsteal."],
   ["AD Milia", "Spiele AD Milia erfolgreich."],
   ["Most DMG", "Habe den meisten Schaden im Spiel."],
-  ["Full Mejais", "Habe ein volles Mejai's Soulstealer aufgebaut."]
+  ["Full Mejais", "Habe ein volles Mejai's Soulstealer aufgebaut."],
+  // hier kannst du weitere Challenges hinzufügen
 ];
 
+// 🔹 Zufällige Auswahl
+function getRandomChallenges(pool, count) {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
 
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
+let challenges = [];
 
 // Start Spiel
 startBtn.addEventListener("click",()=>{
@@ -135,6 +142,11 @@ startBtn.addEventListener("click",()=>{
   playerColor=colorInput.value;
   gridSize=parseInt(gridSizeInput.value);
   playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
+
+  // Zufällige Challenges für das Spiel auswählen
+  const totalFields = gridSize * gridSize;
+  challenges = getRandomChallenges(challengePool, totalFields);
+
   set(ref(db,"gridSize"),gridSize);
   nameInput.style.display="none";
   colorInput.style.display="none";
@@ -261,11 +273,10 @@ onValue(ref(db), snapshot=>{
 // Reset
 resetBtn.addEventListener("click",()=>{
   remove(ref(db,"board"));
+  const totalFields = gridSize * gridSize;
+  challenges = getRandomChallenges(challengePool, totalFields); // neue zufällige Challenges
   createGrid(gridSize);
 });
 </script>
 </body>
 </html>
-
-
-
