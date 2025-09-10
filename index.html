@@ -41,9 +41,21 @@ input, select, button { font-size:16px; padding:5px; margin:5px; }
 <div class="container">
 <h1>Challenge-Tik-Tac-Toe Multiplayer</h1>
 
+<!-- ... dein bisheriger HTML-Head bleibt gleich ... -->
 <div>
 <input type="text" id="nameInput" placeholder="Spielername eingeben"><br>
 <input type="color" id="colorInput" value="#3498db"><br>
+
+<label>Muster:
+  <select id="patternSelect">
+    <option value="stripes">Streifen</option>
+    <option value="checker">Schachbrett</option>
+    <option value="dots">Punkte</option>
+    <option value="waves">Wellen</option>
+    <option value="gradient">Verlauf</option>
+  </select>
+</label><br>
+
 <label>Feldgröße:
   <select id="gridSize">
     <option value="3">3x3</option>
@@ -165,6 +177,58 @@ let playerName = "";
 let playerColor = "";
 let gridSize = 5;
 
+const patternSelect = document.getElementById("patternSelect");
+
+// Funktion, um Hintergrundmuster zu setzen
+function setBackgroundPattern(color, pattern){
+  switch(pattern){
+    case "stripes":
+      document.body.style.background = `repeating-linear-gradient(45deg, ${color}33 0 20px, ${color}11 20px 40px)`;
+      break;
+    case "checker":
+      document.body.style.background = `conic-gradient(${color}33 25%, transparent 0 50%, ${color}33 0 75%, transparent 0)`;
+      document.body.style.backgroundSize = "40px 40px";
+      break;
+    case "dots":
+      document.body.style.background = `radial-gradient(${color}44 20%, transparent 21%)`;
+      document.body.style.backgroundSize = "30px 30px";
+      break;
+    case "waves":
+      document.body.style.background = `repeating-radial-gradient(circle at 0 0, ${color}22, ${color}22 10px, transparent 10px, transparent 20px)`;
+      document.body.style.backgroundSize = "40px 40px";
+      break;
+    case "gradient":
+      document.body.style.background = `linear-gradient(120deg, ${color}33, ${color}11)`;
+      break;
+  }
+  document.body.style.backgroundAttachment="fixed";
+}
+
+// Im Start-Button Event
+startBtn.addEventListener("click",()=>{
+  if(!nameInput.value.trim()){alert("Bitte gib deinen Namen ein!");return;}
+  playerName=nameInput.value.trim();
+  playerColor=colorInput.value;
+  gridSize=parseInt(gridSizeInput.value);
+  const pattern = patternSelect.value;       // ausgewähltes Muster
+  playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
+
+  // Hintergrund setzen
+  setBackgroundPattern(playerColor, pattern);
+
+  // Grid in Firebase speichern
+  const totalFields = gridSize * gridSize;
+  const challenges = getRandomChallenges(challengePool, totalFields);
+  set(ref(db,"grid"),{ gridSize, challenges });
+
+  nameInput.style.display="none";
+  colorInput.style.display="none";
+  patternSelect.style.display="none";
+  gridSizeInput.style.display="none";
+  startBtn.style.display="none";
+});
+
+  
 // Start Spiel (setzt Grid global in DB)
 startBtn.addEventListener("click",()=>{
   if(!nameInput.value.trim()){alert("Bitte gib deinen Namen ein!");return;}
