@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <title>Challenge-Tik-Tac-Toe Multiplayer</title>
 <style>
-body { font-family: sans-serif; margin: 0; padding: 0; }
-.container { max-width: 1000px; margin: 0 auto; padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.controls { margin-bottom: 20px; }
+body { font-family: sans-serif; text-align: center; margin: 0; padding: 0; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 .game-area { display: flex; justify-content: center; align-items: flex-start; gap: 40px; width: 100%; }
 .grid {
   display: grid;
   gap: 5px;
+  justify-content: center;
+  margin-top: 20px;
 }
 .cell {
   display: flex;
@@ -30,6 +31,7 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
   user-select: none;
   background-color: #fff;
 }
+input, select, button { font-size:16px; padding:5px; margin:5px; }
 #playerStats { 
   text-align: left; 
   display: flex; 
@@ -40,27 +42,22 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 #playerStats li {
   margin-bottom: 10px;
   display: flex;
-  align-items: center; /* zentriert Kreis und Text */
-  gap: 8px;            /* Abstand zwischen Kreis und Name */
-  box-sizing: border-box; /* Rahmen und Padding wirken nicht verschiebend */
+  align-items: center;
+  gap: 8px;
 }
 .color-circle { width: 24px; height: 24px; border-radius: 50%; display: inline-block; margin-right: 10px; }
-input, select, button { font-size:16px; padding:5px; margin:5px; }
+#spacer { visibility: hidden; }
 @media (max-width:600px){
   .cell { width: 60px; height: 60px; font-size:12px; }
   .color-circle { width: 16px; height: 16px; }
 }
-#spacer {
-  visibility: hidden;
-}
-
 </style>
 </head>
 <body>
 <div class="container">
 <h1>Challenge-Tik-Tac-Toe Multiplayer</h1>
 
-<div class="controls">
+<div>
 <input type="text" id="nameInput" placeholder="Spielername eingeben"><br>
 <input type="color" id="colorInput" value="#3498db"><br>
 
@@ -93,7 +90,7 @@ input, select, button { font-size:16px; padding:5px; margin:5px; }
 <div class="game-area">
   <div id="playerStats"></div>
   <div class="grid" id="grid"></div>
-  <div id="spacer"></div> <!-- unsichtbare Box rechts -->
+  <div id="spacer"></div>
 </div>
 
 <button id="resetBtn">🔄 Neues Spiel starten</button>
@@ -129,7 +126,7 @@ const patternSelect = document.getElementById("patternSelect");
 
 // 🔹 Challenge-Pool
 const challengePool = [
-["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
+  ["Gold Hunter", "Bekomme ein Shutdown von 700 Gold auf deinen Kopf ausgesetzt."],
   ["Damage Dealer", "Habe mehr als 50k Schaden."],
   ["Death Count", "Habe mehr als 20 Tode."],
   ["First Strike", "Erhalte First Blood."],
@@ -154,7 +151,7 @@ const challengePool = [
   ["I'll do it myself", "Spiele AD Milio erfolgreich."],
   ["Damage Master", "Habe den meisten Schaden im Spiel."],
   ["Soul Collector", "Habe ein volles Mejai's Soulstealer aufgebaut."],
-  ["Immortal", "Gewinne ohne zu sterben."]
+  ["Immortal", "Gewinne ohne zu sterben."],
   ["Jungle First", "Erreiche als Jungle-Player den First Blood."],
   ["Tower Dive", "Erledige einen Gegner unter dem Turm."],
   ["Triple Kill", "Erziele einen Triple Kill in einem Fight."],
@@ -197,8 +194,9 @@ function getRandomChallenges(pool, count) {
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
+const patternSelectEl = document.getElementById("patternSelect");
 
-// 🔹 Hintergrundmuster-Funktion
+// 🔹 Hintergrundmuster
 function setBackgroundPattern(color, pattern){
   switch(pattern){
     case "stripes":
@@ -226,16 +224,14 @@ function setBackgroundPattern(color, pattern){
 // 🔹 Start Button
 startBtn.addEventListener("click",()=>{
   if(!nameInput.value.trim()){alert("Bitte gib deinen Namen ein!"); return;}
-  playerName=nameInput.value.trim();
-  playerColor=colorInput.value;
-  gridSize=parseInt(gridSizeInput.value);
+  playerName = nameInput.value.trim();
+  playerColor = colorInput.value;
+  gridSize = parseInt(gridSizeInput.value);
   const pattern = patternSelect.value;
-  playerDisplay.textContent=`Du bist ${playerName} (${playerColor})`;
+  playerDisplay.textContent = `Du bist ${playerName} (${playerColor})`;
 
-  // Hintergrund
   setBackgroundPattern(playerColor, pattern);
 
-  // Grid in Firebase speichern
   const totalFields = gridSize*gridSize;
   const challenges = getRandomChallenges(challengePool, totalFields);
   set(ref(db,"grid"), { gridSize, challenges });
@@ -262,27 +258,34 @@ function createGrid(size,challenges){
     cell.title=longText;
     cell.textContent=shortText;
 
-    cell.addEventListener("click", async (e)=>{
-      const fieldRef = ref(db,"board/"+i);
-      const snap = await new Promise(res=>onValue(fieldRef,s=>{res(s);},{onlyOnce:true}));
-      const fieldData = snap.val()||{players:{}};
-      const players = fieldData.players||{};
-      const exclusivePlayer = fieldData.exclusivePlayer||null;
-      const isSelected = players[playerName] !== undefined;
+  // Einfacher Klick → normale Auswahl
+cell.addEventListener("click", async () => {
+  const fieldRef = ref(db, "board/" + i);
+  const snap = await new Promise(res => onValue(fieldRef, s => { res(s); }, { onlyOnce: true }));
+  const fieldData = snap.val() || { players: {} };
+  const players = fieldData.players || {};
+  const exclusivePlayer = fieldData.exclusivePlayer || null;
+  const isSelected = players[playerName] !== undefined;
 
-      if(e.detail===2){
-        if(exclusivePlayer && exclusivePlayer!==playerName) return;
-        set(fieldRef, { players:{[playerName]: {color:playerColor}}, exclusivePlayer: playerName });
-      } else {
-        if(isSelected){
-          remove(ref(db,"board/"+i+"/players/"+playerName));
-          if(exclusivePlayer===playerName) update(fieldRef,{exclusivePlayer:null});
-        } else {
-          if(exclusivePlayer) return;
-          set(ref(db,"board/"+i+"/players/"+playerName), {color:playerColor, exclusive:false});
-        }
-      }
-    });
+  if (isSelected) {
+    remove(ref(db, `board/${i}/players/${playerName}`));
+    if (exclusivePlayer === playerName) update(fieldRef, { exclusivePlayer: null });
+  } else {
+    if (exclusivePlayer) return; // niemand kann setzen, wenn schon exklusiv
+    set(ref(db, `board/${i}/players/${playerName}`), { color: playerColor, exclusive: false });
+  }
+});
+
+// Doppelklick → Exklusiv markieren
+cell.addEventListener("dblclick", async () => {
+  const fieldRef = ref(db, "board/" + i);
+  const snap = await new Promise(res => onValue(fieldRef, s => { res(s); }, { onlyOnce: true }));
+  const fieldData = snap.val() || { players: {} };
+  const exclusivePlayer = fieldData.exclusivePlayer || null;
+
+  if (exclusivePlayer && exclusivePlayer !== playerName) return; // exklusiv durch andere
+  set(fieldRef, { players: { [playerName]: { color: playerColor } }, exclusivePlayer: playerName });
+});
 
     grid.appendChild(cell);
   }
@@ -298,7 +301,7 @@ function getContrastYIQ(hex){
   return yiq>=128?"black":"white";
 }
 
-// 🔹 Listener für Grid
+// 🔹 Listener Grid
 onValue(ref(db,"grid"), snap=>{
   if(snap.exists()){
     const { gridSize: size, challenges } = snap.val();
@@ -307,77 +310,81 @@ onValue(ref(db,"grid"), snap=>{
   }
 });
 
-// 🔹 Board Listener & Spieler-Legende
-onValue(ref(db,"board"), snapshot => {
-  const board = snapshot.val() || {};
+// 🔹 Board Listener & Scoreboard
+// 🔹 Board Listener & Scoreboard
+onValue(ref(db,"board"), snapshot=>{
+  const board = snapshot.val()||{};
 
-  // 🔹 Grid-Farben
-  document.querySelectorAll(".cell").forEach(cell => {
+  document.querySelectorAll(".cell").forEach(cell=>{
     const idx = cell.dataset.index;
     const field = board[idx];
+
+    // Standard zurücksetzen
     cell.style.border = "2px solid #333";
     cell.style.background = "#fff";
     cell.style.color = "black";
 
-    if (field && field.players) {
+    if(field && field.players){
       const playerArr = Object.entries(field.players);
-      if (field.exclusivePlayer) {
+
+      if(field.exclusivePlayer){
+        // Exklusiver Spieler → goldener Rahmen
         const player = field.exclusivePlayer;
         cell.style.backgroundColor = field.players[player].color;
         cell.style.color = getContrastYIQ(field.players[player].color);
-      } else if (playerArr.length > 0) {
-        const colors = playerArr.map(([n, p]) => p.color);
+        cell.style.border = "3px solid gold";
+      } else if(playerArr.length > 0){
+        // Mehrere Spieler → Gradient
+        const colors = playerArr.map(([n,p])=>p.color);
         const percent = 100 / colors.length;
-        const gradient = colors.map((c, i) => `${c} ${i*percent}% ${(i+1)*percent}%`).join(", ");
+        const gradient = colors.map((c,i)=>`${c} ${i*percent}% ${(i+1)*percent}%`).join(', ');
         cell.style.background = `linear-gradient(to right, ${gradient})`;
         cell.style.color = "black";
+        cell.style.border = "2px solid #333";
       }
     }
   });
 
-  // 🔹 Spieler-Legende & Punkte
+  // Scoreboard
   const playerCounts = {};
-  Object.values(board).forEach(f => {
-    if (f.players) Object.keys(f.players).forEach(p => {
-      playerCounts[p] = (playerCounts[p] || 0) + 1;
-    });
+  Object.values(board).forEach(f=>{
+    if(f.players){
+      Object.keys(f.players).forEach(p=>{
+        playerCounts[p] = (playerCounts[p]||0)+1;
+      });
+    }
   });
 
   const playersArr = [];
-  Object.keys(playerCounts).forEach(name => {
-    let color = "#000";
-    for (const f of Object.values(board)) {
-      if (f.players && f.players[name]) {
-        color = f.players[name].color;
-        break;
-      }
+  Object.keys(playerCounts).forEach(name=>{
+    let color="#000";
+    for(const f of Object.values(board)){
+      if(f.players && f.players[name]){ color=f.players[name].color; break; }
     }
-    if (name === playerName && color === "#000") color = playerColor;
-    playersArr.push({name, points: playerCounts[name], color});
+    if(name===playerName && color==="#000") color=playerColor;
+    playersArr.push({name, points:playerCounts[name], color});
   });
 
-  // Falls eigener Spieler noch nicht in der Liste ist
-  if (playerName && !playersArr.find(p => p.name === playerName)) {
-    playersArr.push({name: playerName, points: 0, color: playerColor});
+  if(playerName && !playersArr.find(p=>p.name===playerName)){
+    playersArr.push({name:playerName, points:0, color:playerColor});
   }
 
-  // Sortierung nach Punkten
-  playersArr.sort((a, b) => b.points - a.points);
+  playersArr.sort((a,b)=>b.points-a.points);
 
-  // HTML erzeugen
-  let legendHTML = "<ul>";
-  playersArr.forEach(p => {
-    const isCurrent = p.name === playerName;
+  let legendHTML="<ul>";
+  playersArr.forEach(p=>{
+    const isCurrent = p.name===playerName;
     legendHTML += `<li>
       <span class="color-circle" style="background:${p.color}"></span>
-      <span style="font-weight:${isCurrent ? 'bold' : 'normal'}">${p.name}</span>: ${p.points} Punkte
+      <span style="font-weight:${isCurrent ? 'bold':'normal'}">${p.name}</span>: ${p.points} Punkte
     </li>`;
   });
   legendHTML += "</ul>";
-  playerStatsDiv.innerHTML = legendHTML;
-  const spacer = document.getElementById("spacer");
-spacer.style.width = `${playerStatsDiv.offsetWidth}px`;
+  playerStatsDiv.innerHTML=legendHTML;
 
+  // Spacer für zentriertes Grid
+  const spacer = document.getElementById("spacer");
+  spacer.style.width = `${playerStatsDiv.offsetWidth}px`;
 });
 // 🔹 Reset Button
 resetBtn.addEventListener("click", ()=>{
@@ -385,16 +392,11 @@ resetBtn.addEventListener("click", ()=>{
   const totalFields = gridSize*gridSize;
   let newChallenges = getRandomChallenges(challengePool, totalFields);
   newChallenges.sort(()=>0.5-Math.random());
-  set(ref(db,"grid"),{gridSize, challenges:newChallenges});
+  set(ref(db,"grid"), {gridSize, challenges:newChallenges});
 });
 
 </script>
 </body>
 </html>
-
-
-
-
-
 
 
