@@ -1,0 +1,15 @@
+export const challenges = [
+  ["Critical Support", "Treffe einen Crit mit Yuumi."],
+  ["Death Count", "Habe mehr als 20 Tode."],
+  ["Cold Death", "Erziele eine Kill mit einem Schneeball."],
+  ["No Money", "Habe weniger als 2 Tode."],
+  ["Hat Collector", "Sammle mehr als 15 Hüte."],
+  ["Barefoot", "Spiele das Spiel ohne Boots."],
+  ["Wind Rider", "Spiele Yasuo."],
+  ["I'll do it myself", "Spiele AD Milio erfolgreich."],
+  ["Calling of the moon", "Spiele Warwick."],
+  ["And away...", "Entkomme dem Tod durch ein Portal."],
+  ["It's about me", "Bekomme alle healing pads innerhalb von 30 sek."],
+  ["It's about sending a message", "Verkaufe alle Items nach dem Du full-build bist, ohne es rückgängig zu machen."],
+  ["Always with you", "Habe eine Kill part. von >90%"],
+];
