@@ -69,7 +69,7 @@ function setBackgroundPattern(color, pattern){
       document.body.style.background = `${color} url("img/SHrek.png") center/cover no-repeat`;
       break;
     case "image2": // 🔹 neues Muster
-      document.body.style.background = `${color} url("img/stars.png") center/cover no-repeat`;
+      document.body.style.background = `${color} url("img/stars.jpg") center/cover no-repeat`;
       break;
   }
   document.body.style.backgroundAttachment="fixed";
@@ -301,6 +301,7 @@ if (challengesPool.length === 0) {
   newChallenges.sort(()=>0.5-Math.random());
   set(ref(db,"grid"), {gridSize, challenges:newChallenges});
 });
+
 
 
 
