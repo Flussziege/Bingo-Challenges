@@ -40,6 +40,9 @@ function getRandomChallenges(pool, count) {
   return shuffled.slice(0, count);
 }
 
+
+let gridCreated = false; // verhindert, dass das Grid mehrfach erstellt wird
+
 let playerName = "";
 let playerColor = "";
 let gridSize = 5;
@@ -147,6 +150,8 @@ function createGrid(size,challenges){
 
     // Einfacher Klick
     cell.addEventListener("click", async () => {
+      if (!playerName) return; // Spieler muss zuerst starten
+      
       const fieldRef = ref(db, "board/" + i);
       const snap = await new Promise(res => onValue(fieldRef, s => { res(s); }, { onlyOnce: true }));
       const fieldData = snap.val() || { players: {} };
@@ -165,6 +170,8 @@ function createGrid(size,challenges){
 
     // Doppelklick → Exklusiv
     cell.addEventListener("dblclick", async () => {
+      if (!playerName) return; // Spieler muss zuerst starten
+
       const fieldRef = ref(db, "board/" + i);
       const snap = await new Promise(res => onValue(fieldRef, s => { res(s); }, { onlyOnce: true }));
       const fieldData = snap.val() || { players: {} };
@@ -188,13 +195,18 @@ function getContrastYIQ(hex){
 }
 
 // 🔹 Listener Grid
-onValue(ref(db,"grid"), snap=>{
-  if(snap.exists()){
-    const { gridSize: size, challenges } = snap.val();
-    gridSize=size;
-    createGrid(size,challenges);
+onValue(ref(db,"grid"), snap => {
+  if (!snap.exists()) return;
+  const { gridSize: size, challenges } = snap.val();
+
+  // Grid nur einmal erstellen
+  if (!gridCreated) {
+    gridSize = size;
+    createGrid(size, challenges);
+    gridCreated = true;
   }
 });
+
 
 // 🔹 Board Listener & Scoreboard
 // 🔹 Board Listener & Scoreboard
@@ -301,6 +313,7 @@ if (challengesPool.length === 0) {
   newChallenges.sort(()=>0.5-Math.random());
   set(ref(db,"grid"), {gridSize, challenges:newChallenges});
 });
+
 
 
 
